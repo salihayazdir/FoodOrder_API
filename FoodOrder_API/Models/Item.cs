@@ -12,6 +12,11 @@ namespace FoodOrder_API.Models
         [MaxLength(255)]
         public string Name { get; set; }
         public string Description { get; set; }
+        [Required]
         public double Price { get; set; }
+        [ForeignKey("Category")]
+        [Required]
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }
