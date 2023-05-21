@@ -59,6 +59,7 @@ namespace FoodOrder_API.Controllers
                     from oh in _db.OrderHeaders
                     join ad in _db.Addresses on oh.AddressId equals ad.Id
                     join us in _db.Users on oh.UserId equals us.Id
+                    orderby oh.DateTime descending
                     select new
                     {
                         id = oh.Id,
@@ -98,6 +99,7 @@ namespace FoodOrder_API.Controllers
                 join ad in _db.Addresses on oh.AddressId equals ad.Id
                 join us in _db.Users on oh.UserId equals us.Id
                 where oh.UserId == int.Parse(nameid)
+                orderby oh.DateTime descending
                 select new
                 {
                     id = oh.Id,
@@ -185,7 +187,9 @@ namespace FoodOrder_API.Controllers
             {
                 UserId = int.Parse(nameid),
                 AddressId = req.AddressId,
-                Notes = req.Notes
+                Notes = req.Notes,
+                DateTime = DateTime.Now,
+                Status = 1
             };
 
             await _db.OrderHeaders.AddAsync(newHeader);
@@ -231,20 +235,21 @@ namespace FoodOrder_API.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateOrder(int id, [FromBody] OrderHeader orderBody)
+        public async Task<IActionResult> UpdateOrder(int id, [FromBody] OrderStatusChangeDTO orderStatusChangeDTO)
         {
-            if (orderBody == null || id != orderBody.Id)
-            {
-                return BadRequest();
-            }
-            var category = _db.OrderHeaders.FirstOrDefault(u => u.Id == id);
-            if (category == null)
+            //if (orderStatusChangeDTO == null || id != orderStatusChangeDTO.status)
+            //{
+            //    return BadRequest();
+            //}
+            var orderHeader = _db.OrderHeaders.FirstOrDefault(u => u.Id == id);
+            if (orderHeader == null)
             {
                 return NotFound();
             }
-            category.Status = orderBody.Status;
 
-            _db.OrderHeaders.Update(category);
+            orderHeader.Status = orderStatusChangeDTO.status;
+
+            _db.OrderHeaders.Update(orderHeader);
             await _db.SaveChangesAsync();
 
             return NoContent();
