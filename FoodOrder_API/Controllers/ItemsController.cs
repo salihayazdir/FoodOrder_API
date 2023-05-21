@@ -4,6 +4,7 @@ using FoodOrder_API.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Any;
 
 namespace FoodOrder_API.Controllers
 {
@@ -20,9 +21,22 @@ namespace FoodOrder_API.Controllers
         [Authorize]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Item>>> GetItems()
+        public async Task<ActionResult<AnyType>> GetItems()
         {
-            return Ok(await _db.Items.ToListAsync());
+            var items = (
+                from it in _db.Items
+                join ct in _db.Categories on it.CategoryId equals ct.Id
+                select new
+                {
+                    id = it.Id,
+                    name = it.Name,
+                    price = it.Price,
+                    description = it.Description,
+                    category = ct.Name
+                }
+            );
+
+            return Ok(items);
         }
 
         [Authorize]
@@ -43,21 +57,22 @@ namespace FoodOrder_API.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpPost]
-        public async Task<ActionResult<Item>> CreateItem([FromBody] Item item)
+        public async Task<ActionResult<Item>> CreateItem([FromBody] AddItemDTO item)
         {
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+
             if(item == null)
             {
                 return BadRequest();
             }
-            if(item.Id > 0)
+
+            var newItem = new Item
             {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-            await _db.Items.AddAsync(item);
+                CategoryId = item.CategoryId,
+                Name = item.Name,
+                Price = item.Price,
+                Description = item.Description,
+            };
+            await _db.Items.AddAsync(newItem);
             await _db.SaveChangesAsync();
 
             return Ok(item);

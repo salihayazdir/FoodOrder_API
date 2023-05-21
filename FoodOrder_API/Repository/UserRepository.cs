@@ -28,9 +28,9 @@ namespace FoodOrder_API.Repository
         public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
         {
             var user = _db.Users.FirstOrDefault(u => 
-            u.UserName.ToLower() == loginRequestDTO.UserName.ToLower()
+            u.UserName.ToLower() == loginRequestDTO.userName.ToLower()
             &&
-            u.Password.ToLower() == loginRequestDTO.Password.ToLower()
+            u.Password.ToLower() == loginRequestDTO.password.ToLower()
             );
 
             if(user == null )
@@ -61,9 +61,10 @@ namespace FoodOrder_API.Repository
 
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
+            var writtenToken = tokenHandler.WriteToken(token);
             LoginResponseDTO loginResponseDTO = new LoginResponseDTO()
             {
-                Token = tokenHandler.WriteToken(token),
+                Token = writtenToken,
                 User = user,
             };
 

@@ -66,6 +66,7 @@ namespace FoodOrder_API.Controllers
                         user = us.Name,
                         date = oh.DateTime,
                         notes = oh.Notes,
+                        status = oh.Status,
                     }
 
                 );
@@ -104,6 +105,7 @@ namespace FoodOrder_API.Controllers
                     user = us.Name,
                     date = oh.DateTime,
                     notes = oh.Notes,
+                    status = oh.Status,
                 }
 
             );

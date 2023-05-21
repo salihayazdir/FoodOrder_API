@@ -7,7 +7,13 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Cors",
+        builder => builder.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 // Add services to the container.
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
 {
@@ -50,6 +56,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("Cors");
 
 app.UseAuthentication();
 
